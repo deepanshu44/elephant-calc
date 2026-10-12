@@ -386,6 +386,56 @@ Average Latency:   15.50 µs per evaluation
 
 ---
 
+## 🏗️ Architecture & Internals
+
+Elephant Calc is designed as a pipeline with strict separation between predictive typing, math evaluation, and X11 display rendering:
+
+```text
+ ┌────────────────────────────────────────────────────────┐
+ │ 1. USER INPUT (Keystroke Event)                        │
+ └───────────────────────────┬────────────────────────────┘
+                             ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 2. PREDICTIVE ENGINES (Evaluated on every keystroke)  │
+ │  • autocomplete.c : Contextual token scoring & ranking │
+ │  • brackets.c     : Hierarchical ghost bracket cuts    │
+ └───────────────────────────┬────────────────────────────┘
+                             ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 3. PARSING & EVALUATION CORE                           │
+ │  • parser.c       : Recursive descent (expr->term->fac)│
+ │  • convert.c      : Dimensional units & timezone map   │
+ │  • currency.c     : Background thread exchange rates   │
+ └───────────────────────────┬────────────────────────────┘
+                             ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 4. FORMATTING, STATE & DISPLAY                         │
+ │  • format.c       : Compound units, radix, words       │
+ │  • storage.c      : Persistent ans & saved_symbols.conf│
+ │  • undo.c         : Non-linear undo/redo ring buffer   │
+ │  • main.c         : Cairo rasterization & X11 blit     │
+ └────────────────────────────────────────────────────────┘
+```
+
+### Module Responsibility Map
+
+| Module | Files | Responsibility |
+|---|---|---|
+| **Core Types** | [`elephant.h`](elephant.h) | `VNum` (atomic `double value` + `UnitItem *unit`), symbol registries, and token definitions. |
+| **Predictive UX** | [`autocomplete.c`](autocomplete.c), [`brackets.c`](brackets.c) | Context-aware candidate ranking, dimension-aware unit completion, and AST bracket cut cycling. |
+| **Math Evaluator** | [`parser.c`](parser.c) | Recursive descent parser, operator precedence, spaceless function delimiters, and user functions. |
+| **Unit Engine** | [`convert.c`](convert.c), [`timezone.c`](timezone.c) | Physical dimension conversions, compound unit reductions, and IANA timezone/DST offsets. |
+| **Background Rates**| [`currency.c`](currency.c) | Asynchronous pthread worker fetching live exchange rates with offline disk cache fallback. |
+| **Formatting & State**| [`format.c`](format.c), [`storage.c`](storage.c), [`undo.c`](undo.c) | Decimal precision, Indian/Intl commas, spoken words, disk persistence (`:=`), and undo ring buffer. |
+| **Display Server** | [`main.c`](main.c) | X11 event dispatching, Cairo HUD surface rendering, and FreeType glyph layout. |
+
+### How to Navigate the Codebase in 10 Minutes
+1. **Start at [`elephant.h`](elephant.h):** Review `VNum` and `UnitItem`. Understanding that numbers carry dimensional unit pointers through the parser explains how all conversions work.
+2. **Trace the CLI Pipeline:** Read [`main.c:378-450`](main.c#L378-L450). It routes raw strings to either [`try_convert_expression()`](convert.c) or [`evaluate_equation_ex()`](parser.c) and outputs via [`format.c`](format.c).
+3. **Explore the Predictive Engines:** Inspect [`detect_autocomplete_context()`](autocomplete.c) and [`bracket_cycle_proactive()`](brackets.c) to see how live keystrokes are analyzed without blocking the UI.
+
+---
+
 ## 🧪 Quality Assurance & Testing
 
 Elephant Calc includes a comprehensive test suite covering mathematical boundaries, buffer stress, recursion limits, and operating system isolation:
