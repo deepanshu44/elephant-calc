@@ -483,7 +483,7 @@ int main(int argc, char *argv[]) {
     /* 2. Window Geometry: Floating Spotlight Bar with Words Row & Drawer */
     int win_w = 680;
     int win_h_collapsed = 204;
-    int win_h_expanded = 488;
+    int win_h_expanded = 504;
     int cur_h = win_h_collapsed;
     bool drawer_open = false;
     int win_x = (screen_w - win_w) / 2;
@@ -1587,7 +1587,7 @@ int main(int argc, char *argv[]) {
                     double row_gap = 6.0;
                     double col_gap = 8.0;
                     double view_top = 390.0;
-                    double view_bottom = win_h_expanded - 8.0;
+                    double view_bottom = win_h_expanded - 32.0;
                     double view_h = view_bottom - view_top;
 
                     /* First pass: calculate total layout height */
@@ -1828,6 +1828,24 @@ int main(int argc, char *argv[]) {
                         cairo_fill(cr);
                     }
                 }
+
+                /* Bottom Footer: Complete Config Path (for visibility) */
+                cairo_set_source_rgb(cr, 0.20, 0.20, 0.26);
+                cairo_set_line_width(cr, 1.0);
+                cairo_move_to(cr, 12.0, win_h_expanded - 26.0);
+                cairo_line_to(cr, win_w - 12.0, win_h_expanded - 26.0);
+                cairo_stroke(cr);
+
+                char cfg_path[512];
+                get_elephant_file_path("settings.conf", cfg_path, sizeof(cfg_path));
+                char cfg_label[600];
+                snprintf(cfg_label, sizeof(cfg_label), "Config: %s", cfg_path);
+
+                set_font(cr, false);
+                cairo_set_font_size(cr, 9.5 * (font_scale > 1.2 ? 1.2 : font_scale));
+                cairo_set_source_rgb(cr, 0.45, 0.48, 0.58);
+                cairo_move_to(cr, 16.0, win_h_expanded - 9.0);
+                cairo_show_text(cr, cfg_label);
             }
 
             /* Blit buffer to X11 window */
