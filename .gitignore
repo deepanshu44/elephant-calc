@@ -1,0 +1,16 @@
+# Executables & build artifacts
+elephant-calc
+elephant-calc-*
+*.o
+*.a
+*.so
+
+# Editor & OS temporary files
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Test & runtime caches
+.cache/
+*.log
