@@ -12,6 +12,12 @@ A lightning-fast, keyboard-driven Spotlight calculator for Linux desktops. Writt
   <img src="assets/screenshot.png" alt="Elephant Calc Floating Spotlight UI" width="680">
 </p>
 
+<h4 align="center">Expandable Configuration Drawer (<code>Ctrl + ;</code> or <code>⚙</code>)</h4>
+
+<p align="center">
+  <img src="assets/settings_drawer.png" alt="Elephant Calc Expanded Configuration Drawer" width="680">
+</p>
+
 ---
 
 ## ⚡ Why Elephant Calc?
