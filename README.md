@@ -6,7 +6,7 @@
 [![Latency](https://img.shields.io/badge/Eval%20Latency-15.5%20%C2%B5s-brightgreen.svg)](#-performance--benchmarks)
 [![Tests](https://img.shields.io/badge/Robustness%20Tests-26%2F26%20Passing-success.svg)](#-quality-assurance--testing)
 
-A lightning-fast, keyboard-driven Spotlight calculator for Linux desktops. Written in pure **C11**, rendered directly to the screen via **Xlib**, **Cairo**, and **FreeType** with **zero web bloat**, instant cold launch (**< 120 ms** to first pixel), sub-microsecond calculation throughput (**15.5 µs / eval**), and a rich multi-row HUD.
+A lightning-fast, keyboard-driven Spotlight calculator for Linux desktops (inspired by Emacs calculator). Written in pure **C11**, rendered directly to the screen via **Xlib**, **Cairo**, and **FreeType** with **zero web bloat**, instant cold launch (**< 120 ms** to first pixel), sub-microsecond calculation throughput (**15.5 µs / eval**), and a rich multi-row HUD.
 
 <p align="center">
   <img src="assets/screenshot.png" alt="Elephant Calc Floating Spotlight UI" width="680">
