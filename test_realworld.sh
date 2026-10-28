@@ -131,7 +131,16 @@ assert_eval "--eval 'sqrt(-1)'" "Error: sqrt neg" "sqrt(-1) (negative sqrt)"
 assert_eval "--eval 'pow(10, 300) * pow(10, 300)'" "Infinity" "Float overflow to Infinity"
 
 echo ""
-echo "--- 2. Function Arguments & Delimiters (Factory Defaults) ---"
+echo "--- 2. Scientific E-Notation & Precision ---"
+assert_eval "--eval '1e6'" "1,000,000" "1e6 (standard scientific)"
+assert_eval "--eval '2.5e-3'" "0.0025" "2.5e-3 (negative exponent)"
+assert_eval "--eval '1e+4'" "10,000" "1e+4 (positive sign exponent)"
+assert_eval "--eval '1e308 * 1e308'" "Infinity" "1e308 * 1e308 (scientific overflow to Infinity)"
+assert_eval "--eval '1e3 km in m'" "1,000,000 m" "1e3 km in m (scientific with units)"
+assert_eval "--decimals 4 --eval '2e'" "5.4366" "2e (Euler constant regression check)"
+
+echo ""
+echo "--- 3. Function Arguments & Delimiters (Factory Defaults) ---"
 assert_eval "--eval 'avg(10,20,30)'" "20" "avg(10,20,30) without spaces"
 assert_eval "--eval 'pow(2,3)'" "8" "pow(2,3) without spaces"
 assert_eval "--eval 'min(5,10)'" "5" "min(5,10) without spaces"
@@ -140,32 +149,32 @@ assert_eval "--eval 'sqrt(1,000,000)'" "1,000" "sqrt(1,000,000) thousands sep"
 assert_eval "--eval '1,000,000 + 500'" "1,000,500" "1,000,000 + 500 with sep"
 
 echo ""
-echo "--- 3. CLI Formatting Flags Verification ---"
+echo "--- 4. CLI Formatting Flags Verification ---"
 assert_eval "--decimals 2 --indian --eval 'avg(10,20,30)'" "20.00" "avg(10,20,30) with 2 decimals"
 assert_eval "--decimals 2 --indian --eval '1,000,000 + 500'" "10,00,500.00" "Indian formatting with 2 decimals"
 assert_eval "--plain --eval '1,000,000 + 500'" "1000500" "Plain formatting without commas"
 
 echo ""
-echo "--- 4. Malformed Syntax & Empty Arguments ---"
+echo "--- 5. Malformed Syntax & Empty Arguments ---"
 assert_eval "--eval '1 ++ 2'" "3" "1 ++ 2 (unary plus)"
 assert_eval "--eval '***'" "Error: syntax error" "*** (invalid operators)"
 assert_eval "--eval 'avg()'" "Error: avg needs at least 1 arg" "avg() (empty arguments)"
 assert_eval "--eval 'pow(,)'" "Error: syntax error" "pow(,) (missing arguments)"
 
 echo ""
-echo "--- 5. Pure Bash Recursion Depth Stress Tests ---"
+echo "--- 6. Pure Bash Recursion Depth Stress Tests ---"
 for depth in 50 100 250 500 1000; do
     parens_expr=$(make_nested_parens "$depth")
     assert_eval "--eval '$parens_expr'" "1" "Parentheses nesting depth $depth"
 done
 
 echo ""
-echo "--- 6. Pure Bash Large Buffer Stress Test (2,001 Chars) ---"
+echo "--- 7. Pure Bash Large Buffer Stress Test (2,001 Chars) ---"
 long_expr=$(make_repeated_additions 500)
 assert_eval "--eval '$long_expr'" "501" "500 additions (2,001 chars)"
 
 echo ""
-echo "--- 7. Headless & Environment Isolation ---"
+echo "--- 8. Headless & Environment Isolation ---"
 assert_exit_code "env -u DISPLAY \"$TARGET\" --eval 'avg(10,20,30)'" 0 "CLI eval without DISPLAY"
 assert_exit_code "env -u DISPLAY \"$TARGET\"" 1 "GUI startup without DISPLAY (error)"
 

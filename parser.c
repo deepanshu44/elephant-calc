@@ -1445,6 +1445,7 @@ static VNum parse_factor(Parser *p) {
             char num_clean[64];
             size_t n_idx = 0;
             bool has_dot = false;
+            bool has_exp = false;
 
             while (p->src[p->pos]) {
                 char ch = p->src[p->pos];
@@ -1454,10 +1455,25 @@ static VNum parse_factor(Parser *p) {
                 } else if (ch == ',' && p->in_multi_arg_func == 0 && is_valid_thousands_separator(p->src, p->pos)) {
                     /* Ignore comma between digits for verified thousands separator */
                     p->pos++;
-                } else if (ch == '.' && !has_dot) {
+                } else if (ch == '.' && !has_dot && !has_exp) {
                     has_dot = true;
                     if (n_idx < sizeof(num_clean) - 1) num_clean[n_idx++] = ch;
                     p->pos++;
+                } else if ((ch == 'e' || ch == 'E') && !has_exp && n_idx > 0) {
+                    char next1 = p->src[p->pos + 1];
+                    char next2 = next1 ? p->src[p->pos + 2] : '\0';
+                    if (isdigit((unsigned char)next1) ||
+                        ((next1 == '+' || next1 == '-') && isdigit((unsigned char)next2))) {
+                        has_exp = true;
+                        if (n_idx < sizeof(num_clean) - 1) num_clean[n_idx++] = ch;
+                        p->pos++;
+                        if (next1 == '+' || next1 == '-') {
+                            if (n_idx < sizeof(num_clean) - 1) num_clean[n_idx++] = next1;
+                            p->pos++;
+                        }
+                    } else {
+                        break;
+                    }
                 } else {
                     break;
                 }
